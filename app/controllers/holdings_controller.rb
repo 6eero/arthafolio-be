@@ -13,4 +13,13 @@ class HoldingsController < ApplicationController
       }
     }
   end
+
+  def btc_price
+    price = CoinMarketCapFetcher.new.fetch_price('BTC')
+
+    render json: {
+      symbol: 'BTC',
+      price: price
+    }
+  end
 end
