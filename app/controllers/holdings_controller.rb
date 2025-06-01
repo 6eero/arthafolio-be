@@ -15,8 +15,8 @@ class HoldingsController < ApplicationController
   end
 
   def get_price
-    prices = CoinMarketCapFetcher.new.fetch_prices(['BTC', 'ETH', 'SOL', 'DOT', 'CRO'])
-
+    prices = CoinMarketCapFetcher.new.fetch_prices(['BTC', 'ETH', 'SOL', 'DOT', 'CRO']) 
+    Rails.logger.info "Prices: #{prices.inspect}"  # prices: {"BTC"=>104283.64293003875, "ETH"=>2494.499933147048, "SOL"=>152.08263797451366, "DOT"=>4.026426879903671, "CRO"=>0.10285899614457555}
     render json: prices.map { |symbol, price| { symbol: symbol, price: price } }
   end
 end
