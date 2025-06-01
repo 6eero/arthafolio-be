@@ -2,10 +2,8 @@ class HoldingsController < ApplicationController
   def index
   holdings = Holding.all
 
-  # Prendo i simboli da label (crypto, ETF, ecc.)
   symbols = holdings.map(&:label).uniq
-
-  # Prendo i prezzi per questi simboli
+  
   prices = CoinMarketCapFetcher.new.fetch_prices(symbols)
 
   result = holdings.map do |h|
@@ -14,7 +12,8 @@ class HoldingsController < ApplicationController
       category: h.category,
       label: h.label,
       quantity: h.quantity.to_f,
-      price: prices[h.label],  # usa label per cercare il prezzo
+      price: prices[h.label],
+      value: h.quantity.to_f * prices[h.label].to_f,
       created_at: h.created_at,
       updated_at: h.updated_at
     }
