@@ -14,12 +14,9 @@ class HoldingsController < ApplicationController
     }
   end
 
-  def btc_price
-    price = CoinMarketCapFetcher.new.fetch_price('BTC')
+  def get_price
+    prices = CoinMarketCapFetcher.new.fetch_prices(['BTC', 'ETH', 'SOL', 'DOT', 'CRO'])
 
-    render json: {
-      symbol: 'BTC',
-      price: price
-    }
+    render json: prices.map { |symbol, price| { symbol: symbol, price: price } }
   end
 end

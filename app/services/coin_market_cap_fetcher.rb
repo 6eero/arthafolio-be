@@ -6,24 +6,33 @@ class CoinMarketCapFetcher
 
   def initialize
     @headers = {
-      'X-CMC_PRO_API_KEY' => ENV['CMC_API_KEY'], # ✅ carica l'API key da variabili d'ambiente
+      'X-CMC_PRO_API_KEY' => ENV['CMC_API_KEY'],
       'Accept' => 'application/json'
     }
   end
 
-  def fetch_price(symbol = 'BTC')
+  # Accetta uno o più simboli (stringa singola o array) e restituisce un hash con i prezzi
+  def fetch_prices(symbols = ['BTC'])
+    symbols = [symbols] if symbols.is_a?(String) # garantisce un array
+    query_symbols = symbols.join(',')
+
     response = self.class.get(
       '/cryptocurrency/quotes/latest',
       headers: @headers,
       query: {
-        symbol: symbol,
+        symbol: query_symbols,
         convert: 'USD'
       }
     )
 
     return nil unless response.success?
 
-    data = response.parsed_response["data"][symbol]
-    data["quote"]["USD"]["price"]
+    data = response.parsed_response["data"]
+
+    # Ritorna un hash tipo { 'BTC' => 68000.0, 'ETH' => 3800.0, ... }
+    symbols.each_with_object({}) do |symbol, result|
+      price = data.dig(symbol, "quote", "USD", "price")
+      result[symbol] = price
+    end
   end
 end
