@@ -12,7 +12,7 @@ class CoinMarketCapFetcher
   end
 
   # Accetta uno o più simboli (stringa singola o array) e restituisce un hash con i prezzi
-  def fetch_prices(symbols = ['BTC'])
+  def fetch_prices(symbols)
     symbols = [symbols] if symbols.is_a?(String) # garantisce un array
     query_symbols = symbols.join(',')
 
