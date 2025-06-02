@@ -21,7 +21,7 @@ class CoinMarketCapFetcher
       headers: @headers,
       query: {
         symbol: query_symbols,
-        convert: 'USD'
+        convert: 'EUR'
       }
     )
 
@@ -31,7 +31,7 @@ class CoinMarketCapFetcher
 
     # Ritorna un hash tipo { 'BTC' => 68000.0, 'ETH' => 3800.0, ... }
     symbols.each_with_object({}) do |symbol, result|
-      price = data.dig(symbol, "quote", "USD", "price")
+      price = data.dig(symbol, "quote", "EUR", "price")
       result[symbol] = price
     end
   end
