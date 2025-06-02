@@ -6,7 +6,8 @@ class HoldingsController < ApplicationController
     holdings = Holding.all
 
     crypto_prices = fetch_crypto_prices(holdings)
-    assets = build_assets(holdings, crypto_prices)
+    crypto_total = calculate_crypto_total(holdings, crypto_prices)
+    assets = build_assets(holdings, crypto_prices, crypto_total)
     totals = calculate_totals(holdings, crypto_prices)
 
     render json: { assets: assets, totals: totals }
@@ -19,15 +20,18 @@ class HoldingsController < ApplicationController
     CoinMarketCapFetcher.new.fetch_prices(crypto_symbols)
   end
 
-  def build_assets(holdings, crypto_prices)
+  def build_assets(holdings, crypto_prices, crypto_total)
     holdings.map do |h|
       price = h.category == 1 ? 1 : (crypto_prices[h.label] || 0)
+      value = h.quantity.to_f * price
 
       {
         label: h.label,
         quantity: h.quantity.to_f,
         price: price,
-        value: h.quantity.to_f * price
+        value: value,
+        category: h.category,
+        percentage: h.category.zero? && crypto_total.positive? ? (100.0 * value / crypto_total).round(2) : nil
       }
     end
   end
