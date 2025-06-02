@@ -1,4 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
-  get "api/holdings", to: "holdings#index"
-  get 'api/prices', to: 'holdings#get_price'
+  get 'api/holdings', to: 'holdings#index'
 end
