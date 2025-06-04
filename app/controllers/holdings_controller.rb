@@ -13,6 +13,13 @@ class HoldingsController < ApplicationController
     render json: { assets: assets, totals: totals }
   end
 
+  def show
+    @price = PriceScraper.fetch_enul_price
+    render json: { price: @price }
+  rescue StandardError => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
   private
 
   def fetch_crypto_prices(holdings)

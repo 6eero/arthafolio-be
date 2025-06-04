@@ -312,6 +312,7 @@ DEPENDENCIES
   dotenv-rails
   httparty
   kamal
+  nokogiri
   pg (~> 1.1)
   puma (>= 5.0)
   rack-cors
