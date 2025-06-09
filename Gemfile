@@ -50,6 +50,6 @@ group :development, :test do
   gem 'rubocop-rails-omakase', require: false
 end
 
-gem 'rubocop', '~> 1.75', group: :development
+gem 'rubocop', '~> 1.76', group: :development
 
 gem 'rubocop-rails', '~> 2.32', group: :development
