@@ -27,9 +27,9 @@ class PortfolioCalculator
 
     @holdings.map do |h|
       quantity = h.quantity.to_f
-      price = fetch_price_for(h)
+      price = price_for(h)
       value = (quantity * price).round(2)
-      percentage = (100.0 * value / grand_total).round(2)
+      percentage = grand_total.positive? ? (100.0 * value / grand_total).round(2) : 0
 
       Asset.new(
         label: h.label,
@@ -42,12 +42,8 @@ class PortfolioCalculator
     end
   end
 
-  def fetch_price_for(holding)
-    case holding.category
-    when 'crypto' then crypto_prices[holding.label] || 0
-    when 'etf' then etf_price || 0
-    else 0
-    end
+  def price_for(holding)
+    latest_prices[holding.label] || 0
   end
 
   def grand_total
@@ -65,28 +61,10 @@ class PortfolioCalculator
   def calculate_total_for_category(category)
     @holdings
       .select { |h| h.category == category }
-      .sum { |h| h.quantity.to_f * fetch_price_for(h) }
+      .sum { |h| h.quantity.to_f * price_for(h) }
   end
 
-  def crypto_prices
-    @crypto_prices ||= begin
-      crypto_symbols = @holdings.select(&:crypto?).map(&:label).uniq
-      CoinMarketCapFetcher.new.fetch_prices(crypto_symbols)
-    rescue StandardError => e
-      Rails.logger.error "CoinMarketCap API Error: #{e.message}"
-      {}
-    end
-  end
-
-  def etf_price
-    @etf_price ||= begin
-      Rails.logger.info 'Fetching ETF price via PriceScraper'
-      price = PriceScraper.fetch_enul_price
-      Rails.logger.info "Fetched ETF price: #{price}"
-      price
-    rescue StandardError => e
-      Rails.logger.error "PriceScraper Error: #{e.class} - #{e.message}"
-      nil
-    end
+  def latest_prices
+    @latest_prices ||= Price.pluck(:label, :price).to_h
   end
 end
