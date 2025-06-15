@@ -12,11 +12,28 @@ class PortfolioCalculator
     @assets ||= build_assets
   end
 
+  def history
+    [
+      { value: 15_170.40, retrieved_at: '2025-06-15 15:00:27.363973' },
+      { value: 22_596.39, retrieved_at: '2025-06-15 16:00:27.363973' },
+      { value: 28_359.85, retrieved_at: '2025-06-15 17:00:27.363973' },
+      { value: 32_602.92, retrieved_at: '2025-06-15 18:00:27.363973' },
+      { value: 39_307.48, retrieved_at: '2025-06-15 19:00:27.363973' },
+      { value: 36_653.87, retrieved_at: '2025-06-15 20:00:27.363973' },
+      { value: 47_199.96, retrieved_at: '2025-06-15 21:00:27.363973' },
+      { value: 48_359.85, retrieved_at: '2025-06-15 22:00:27.363973' },
+      { value: 42_602.92, retrieved_at: '2025-06-15 23:00:27.363973' },
+      { value: 49_307.48, retrieved_at: '2025-06-16 00:00:27.363973' },
+      { value: 56_653.87, retrieved_at: '2025-06-16 01:00:27.363973' },
+      { value: 57_199.96, retrieved_at: '2025-06-16 02:00:27.363973' }
+    ]
+  end
+
   def totals
     {
-      crypto: crypto_total.round(2),
-      etf: etf_total.round(2),
-      total: grand_total.round(2)
+      crypto: crypto_total.to_f.round(2),
+      etf: etf_total.to_f.round(2),
+      total: grand_total.to_f.round(2)
     }
   end
 
@@ -27,8 +44,8 @@ class PortfolioCalculator
 
     @holdings.map do |h|
       quantity = h.quantity.to_f
-      price = price_for(h).to_f
-      value = (quantity * price).round(2).to_f
+      price = price_for(h).to_f.round(2)
+      value = (quantity * price).to_f.round(2)
       percentage = grand_total.positive? ? (100.0 * value / grand_total).round(2) : 0
 
       Asset.new(
