@@ -1,12 +1,13 @@
+# app/models/holding.rb
 class Holding < ApplicationRecord
-  # enum category: { crypto: 0, liquidity: 1 } # commentato per test
+  # ... altre validazioni o associazioni ...
 
-  CATEGORIES = { 0 => 'crypto', 1 => 'liquidity', 2 => 'etf' }.freeze
+  # Usa enum per le categorie
+  enum :category, { crypto: 0, liquidity: 1, etf: 2 }
 
-  validates :label, presence: true
-  validates :quantity, numericality: { greater_than_or_equal_to: 0 }
-
-  def category_name
-    CATEGORIES[category]
-  end
+  # Questo ti darà gratuitamente dei metodi helper come:
+  # holding.crypto?
+  # holding.liquidity?
+  # holding.etf!
+  # Holding.crypto # -> restituisce tutti gli holding di tipo crypto
 end
