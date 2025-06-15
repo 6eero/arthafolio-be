@@ -1,0 +1,8 @@
+# config/schedule.yml
+asset_price_updater:
+  # Esegui ogni ora, al minuto 0. (es. 13:00, 14:00, etc.)
+  cron: "0 * * * *"
+  # La classe del Job da eseguire
+  class: "AssetPriceUpdaterJob"
+  # La coda in cui metterlo
+  queue: "default"
