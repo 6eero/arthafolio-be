@@ -1,13 +1,9 @@
-# app/models/holding.rb
+# frozen_string_literal: true
+
+# Represents a financial holding in a user's portfolio.
+#
+# Each holding belongs to a specific category, such as a cryptocurrency or an ETF.
+# The `category` field is implemented as an enum.
 class Holding < ApplicationRecord
-  # ... altre validazioni o associazioni ...
-
-  # Usa enum per le categorie
-  enum :category, { crypto: 0, liquidity: 1, etf: 2 }
-
-  # Questo ti darà gratuitamente dei metodi helper come:
-  # holding.crypto?
-  # holding.liquidity?
-  # holding.etf!
-  # Holding.crypto # -> restituisce tutti gli holding di tipo crypto
+  enum :category, { crypto: 0, etf: 1 }
 end

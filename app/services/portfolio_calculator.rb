@@ -2,71 +2,72 @@
 
 # app/services/portfolio_calculator.rb
 class PortfolioCalculator
-  # Inizializziamo l'oggetto con la collezione di holdings
+  Asset = Struct.new(:label, :quantity, :price, :value, :category, :percentage, keyword_init: true)
+
   def initialize(holdings)
     @holdings = holdings
   end
 
-  # Metodo pubblico per ottenere gli asset formattati
   def assets
     @assets ||= build_assets
   end
 
-  # Metodo pubblico per ottenere i totali
   def totals
     {
-      crypto: crypto_total,
-      liquidity: liquidity_total,
-      etf: etf_total,
-      total: crypto_total + liquidity_total + etf_total
+      crypto: crypto_total.round(2),
+      etf: etf_total.round(2),
+      total: grand_total.round(2)
     }
   end
 
   private
 
-  # Spostiamo qui la logica di costruzione degli asset
   def build_assets
+    return [] if grand_total.zero?
+
     @holdings.map do |h|
-      price = case h.category
-              when 'liquidity' then 1
-              when 'crypto' then crypto_prices[h.label] || 0
-              when 'etf' then etf_price || 0
-              else 0
-              end
+      quantity = h.quantity.to_f
+      price = fetch_price_for(h)
+      value = (quantity * price).round(2)
+      percentage = (100.0 * value / grand_total).round(2)
 
-      value = h.quantity.to_f * price
-
-      {
+      Asset.new(
         label: h.label,
-        quantity: h.quantity.to_f,
-        price: price,
+        quantity: quantity.round(5),
+        price: price.round(5),
         value: value,
         category: h.category,
-        percentage: (100.0 * value / (crypto_total + liquidity_total + etf_total)).round(2)
-      }
+        percentage: percentage
+      )
     end
   end
 
-  # Spostiamo qui i calcoli dei totali
-  def crypto_total
-    @crypto_total ||= calculate_total_for_category('crypto', crypto_prices)
+  def fetch_price_for(holding)
+    case holding.category
+    when 'crypto' then crypto_prices[holding.label] || 0
+    when 'etf' then etf_price || 0
+    else 0
+    end
   end
 
-  def liquidity_total
-    @liquidity_total ||= @holdings.select(&:liquidity?).sum { |h| h.quantity.to_f * 1 }
+  def grand_total
+    @grand_total ||= crypto_total + etf_total
+  end
+
+  def crypto_total
+    @crypto_total ||= calculate_total_for_category('crypto')
   end
 
   def etf_total
-    @etf_total ||= calculate_total_for_category('etf', { default: etf_price })
+    @etf_total ||= calculate_total_for_category('etf')
   end
 
-  def calculate_total_for_category(category, prices)
+  def calculate_total_for_category(category)
     @holdings
       .select { |h| h.category == category }
-      .sum { |h| h.quantity.to_f * (prices[h.label] || prices[:default] || 0) }
+      .sum { |h| h.quantity.to_f * fetch_price_for(h) }
   end
 
-  # Logica per recuperare i prezzi
   def crypto_prices
     @crypto_prices ||= begin
       crypto_symbols = @holdings.select(&:crypto?).map(&:label).uniq
@@ -79,9 +80,12 @@ class PortfolioCalculator
 
   def etf_price
     @etf_price ||= begin
-      PriceScraper.fetch_enul_price
+      Rails.logger.info 'Fetching ETF price via PriceScraper'
+      price = PriceScraper.fetch_enul_price
+      Rails.logger.info "Fetched ETF price: #{price}"
+      price
     rescue StandardError => e
-      Rails.logger.error "PriceScraper Error: #{e.message}"
+      Rails.logger.error "PriceScraper Error: #{e.class} - #{e.message}"
       nil
     end
   end
