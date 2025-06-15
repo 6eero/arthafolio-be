@@ -27,8 +27,8 @@ class PortfolioCalculator
 
     @holdings.map do |h|
       quantity = h.quantity.to_f
-      price = price_for(h)
-      value = (quantity * price).round(2)
+      price = price_for(h).to_f
+      value = (quantity * price).round(2).to_f
       percentage = grand_total.positive? ? (100.0 * value / grand_total).round(2) : 0
 
       Asset.new(
