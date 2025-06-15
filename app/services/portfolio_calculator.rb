@@ -13,20 +13,7 @@ class PortfolioCalculator
   end
 
   def history
-    [
-      { value: 15_170.40, retrieved_at: '2025-06-15 15:00:27.363973' },
-      { value: 22_596.39, retrieved_at: '2025-06-15 16:00:27.363973' },
-      { value: 28_359.85, retrieved_at: '2025-06-15 17:00:27.363973' },
-      { value: 32_602.92, retrieved_at: '2025-06-15 18:00:27.363973' },
-      { value: 39_307.48, retrieved_at: '2025-06-15 19:00:27.363973' },
-      { value: 36_653.87, retrieved_at: '2025-06-15 20:00:27.363973' },
-      { value: 47_199.96, retrieved_at: '2025-06-15 21:00:27.363973' },
-      { value: 48_359.85, retrieved_at: '2025-06-15 22:00:27.363973' },
-      { value: 42_602.92, retrieved_at: '2025-06-15 23:00:27.363973' },
-      { value: 49_307.48, retrieved_at: '2025-06-16 00:00:27.363973' },
-      { value: 56_653.87, retrieved_at: '2025-06-16 01:00:27.363973' },
-      { value: 57_199.96, retrieved_at: '2025-06-16 02:00:27.363973' }
-    ]
+    @history ||= fetch_history
   end
 
   def totals
@@ -83,5 +70,15 @@ class PortfolioCalculator
 
   def latest_prices
     @latest_prices ||= Price.pluck(:label, :price).to_h
+  end
+
+  # Returns the last 24 portfolio snapshots, order by creation time, as an array of hashes.
+  def fetch_history
+    PortfolioSnapshot.order(created_at: :asc).last(24).map do |snapshot|
+      {
+        value: snapshot.value.to_f,
+        retrieved_at: snapshot.created_at
+      }
+    end
   end
 end
