@@ -7,10 +7,10 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins '*'  # In sviluppo, puoi usare '*'. In produzione, metti il dominio del frontend esatto, es: 'https://mio-frontend.com'
+    origins '*' # In sviluppo, puoi usare '*'. In produzione, metti il dominio del frontend esatto, es: 'https://mio-frontend.com'
 
     resource '*',
-      headers: :any,
-      methods: [:get, :post, :put, :patch, :delete, :options, :head]
+             headers: :any,
+             methods: %i[get post put patch delete options head]
   end
 end

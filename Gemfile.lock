@@ -74,6 +74,7 @@ GEM
       uri (>= 0.13.1)
     ast (2.4.3)
     base64 (0.3.0)
+    bcrypt (3.1.20)
     bcrypt_pbkdf (1.1.1)
     bcrypt_pbkdf (1.1.1-x86_64-darwin)
     benchmark (0.4.1)
@@ -121,6 +122,8 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (2.12.2)
+    jwt (3.0.0)
+      base64
     kamal (2.6.1)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -323,11 +326,13 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  bcrypt
   bootsnap
   brakeman
   debug
   dotenv-rails
   httparty
+  jwt
   kamal
   nokogiri
   pg (~> 1.1)
