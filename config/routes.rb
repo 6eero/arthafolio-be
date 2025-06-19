@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
-require 'sidekiq/web'
-
 Rails.application.routes.draw do
   get 'api/holdings', to: 'holdings#index'
 
-  mount Sidekiq::Web => '/sidekiq'
+  # Namespace per le API
+  namespace :api do
+    post 'login', to: 'sessions#login'
+
+    # Dovrai creare anche l'endpoint per il refresh del token
+    # che il tuo frontend si aspetta di chiamare
+    post 'refresh', to: 'refresh#create'
+  end
 end

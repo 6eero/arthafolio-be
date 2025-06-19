@@ -1,0 +1,41 @@
+# app/controllers/api/sessions_controller.rb
+
+module Api
+  class SessionsController < ApplicationController
+    # Includiamo il nostro gestore di JWT
+    include JsonWebToken
+
+    # Saltiamo la verifica del token di autenticazione solo per l'azione di login
+    # Se usi `before_action :authenticate_request` in ApplicationController, dovrai aggiungere questa riga.
+    # skip_before_action :authenticate_request, only: [:login]
+
+    def login
+      # 1. Cerca l'utente per email
+      @user = User.find_by(email: params[:email])
+
+      # 2. Verifica che l'utente esista e che la password sia corretta
+      if @user&.authenticate(params[:password])
+        # 3. Se l'autenticazione ha successo, genera i token
+
+        # Genera l'access token (vita breve, es. 1 ora)
+        access_token = jwt_encode({ user_id: @user.id }, 1.hour.from_now)
+
+        # Genera un refresh token sicuro e univoco (vita lunga)
+        refresh_token = SecureRandom.hex(32)
+
+        # 4. Salva il refresh token nel database per l'utente
+        # Questo permette di invalidarlo se necessario (es. logout da tutti i dispositivi)
+        @user.update(refresh_token: refresh_token)
+
+        # 5. Restituisce i token al frontend
+        render json: {
+          access_token: access_token,
+          refresh_token: refresh_token
+        }, status: :ok
+      else
+        # 6. Se l'autenticazione fallisce, restituisce un errore
+        render json: { error: 'Invalid email or password' }, status: :unauthorized
+      end
+    end
+  end
+end
