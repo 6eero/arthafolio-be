@@ -8,6 +8,7 @@ module Api
     # Saltiamo la verifica del token di autenticazione solo per l'azione di login
     # Se usi `before_action :authenticate_request` in ApplicationController, dovrai aggiungere questa riga.
     # skip_before_action :authenticate_request, only: [:login]
+    skip_before_action :authenticate_request, only: [:login]
 
     def login
       # 1. Cerca l'utente per email
@@ -18,7 +19,7 @@ module Api
         # 3. Se l'autenticazione ha successo, genera i token
 
         # Genera l'access token (vita breve, es. 1 ora)
-        access_token = jwt_encode({ user_id: @user.id }, 1.hour.from_now)
+        access_token = jwt_encode({ user_id: @user.id }, 1.minute.from_now)
 
         # Genera un refresh token sicuro e univoco (vita lunga)
         refresh_token = SecureRandom.hex(32)
