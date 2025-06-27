@@ -16,14 +16,11 @@ module Api
 
       # 2. Verifica che l'utente esista e che la password sia corretta
       if @user&.authenticate(params[:password])
-        # 3. Se l'autenticazione ha successo, genera i token
 
-        # Genera l'access token (vita breve, es. 1 ora)
-        access_token = jwt_encode({ user_id: @user.id }, 1.minute.from_now)
-
-        # Genera un refresh token sicuro e univoco (vita lunga)
+        # 3. Se l'autenticazione ha successo, genera l'access token (vita breve) e refresh token sicuro e univoco (vita lunga)
+        access_token = jwt_encode({ user_id: @user.id }, 1.hour.from_now)
         refresh_token = SecureRandom.hex(32)
-
+       
         # 4. Salva il refresh token nel database per l'utente
         # Questo permette di invalidarlo se necessario (es. logout da tutti i dispositivi)
         @user.update(refresh_token: refresh_token)
@@ -35,7 +32,7 @@ module Api
         }, status: :ok
       else
         # 6. Se l'autenticazione fallisce, restituisce un errore
-        render json: { error: 'Invalid email or password' }, status: :unauthorized
+        render json: { error: 'Invalid email or password', message: "invalid_email_or_password" }, status: :unauthorized
       end
     end
   end
