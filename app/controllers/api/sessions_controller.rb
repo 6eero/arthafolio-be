@@ -35,5 +35,12 @@ module Api
         render json: { error: 'Invalid email or password', message: "invalid_email_or_password" }, status: :unauthorized
       end
     end
+
+    def logout
+      # Rimuove il refresh token dal DB
+      current_user.update(refresh_token: nil)
+
+      render json: { message: 'Logout successful' }, status: :ok
+    end
   end
 end
