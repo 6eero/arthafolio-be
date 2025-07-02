@@ -1,11 +1,8 @@
 #!/bin/bash
 set -e
 
-# Check if the database exists and is ready
-echo "Waiting for database..."
-until pg_isready -h db -U postgres -d arthafolio-db; do
-  sleep 1
-done
+# (Opzionale) Attendi qualche secondo
+sleep 5
 
 # Setup database:
 # Combina:
