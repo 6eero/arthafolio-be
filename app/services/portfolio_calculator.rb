@@ -73,10 +73,6 @@ class PortfolioCalculator
       crypto_labels = @holdings.select { |h| h.category == 'crypto' }.map(&:label).uniq
       etf_labels = @holdings.select { |h| h.category == 'etf' }.map(&:label).uniq
 
-      Rails.logger.info '🔍 Holdings summary:'
-      Rails.logger.info "🪙 Crypto labels: #{crypto_labels.join(', ')}"
-      Rails.logger.info "📈 ETF labels:    #{etf_labels.join(', ')}"
-
       crypto_prices = {}
       if crypto_labels.any?
         begin
