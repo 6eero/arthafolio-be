@@ -81,7 +81,7 @@ class PortfolioCalculator
       if crypto_labels.any?
         begin
           crypto_prices = CoinMarketCapFetcher.new.fetch_prices(crypto_labels) || {}
-          Rails.logger.info "📈 crypto_prices: #{crypto_prices}"
+          Rails.logger.info "🟢 PortfolioCalculator.latest_prices - crypto_prices #{crypto_prices}"
         rescue StandardError => e
           Rails.logger.error "CMC fetch error: #{e.class} - #{e.message}"
         end
