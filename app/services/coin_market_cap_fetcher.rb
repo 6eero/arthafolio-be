@@ -16,9 +16,22 @@ class CoinMarketCapFetcher
 
   # Accetta uno o più simboli (stringa singola o array) e restituisce un hash con i prezzi
   def fetch_prices(symbols)
+    Rails.logger.info "[🟢 CoinMarketCapFetcher.fetch_prices] - Arguments: #{symbols}"
     symbols = [symbols] if symbols.is_a?(String) # garantisce un array
     query_symbols = symbols.join(',')
 
+    # Controlla se serve aggiornare: almeno un record è più vecchio di 5 minuti?
+    outdated_prices = Price.where(label: symbols).where(retrieved_at: ...5.minutes.ago)
+    if outdated_prices.empty?
+      result = symbols.each_with_object({}) do |symbol, hash|
+        price_record = Price.find_by(label: symbol)
+        hash[symbol] = price_record&.price
+      end
+      Rails.logger.info "[🟠 CoinMarketCapFetcher.fetch_prices] - Prices already updated! No API call done: #{result}"
+      return result
+    end
+
+    # ⬇️ Se almeno un prezzo è vecchio, allora si fa la chiamata
     response = self.class.get(
       '/cryptocurrency/quotes/latest',
       headers: @headers,
@@ -27,15 +40,31 @@ class CoinMarketCapFetcher
         convert: 'EUR'
       }
     )
+    Rails.logger.info "[🟢 CoinMarketCapFetcher.fetch_prices] - Full response: #{response}"
 
     return nil unless response.success?
 
     data = response.parsed_response['data']
 
-    # Ritorna un hash tipo { 'BTC' => 68000.0, 'ETH' => 3800.0, ... }
-    symbols.each_with_object({}) do |symbol, result|
+    result = symbols.each_with_object({}) do |symbol, hash|
       price = data.dig(symbol, 'quote', 'EUR', 'price')
-      result[symbol] = price
+      hash[symbol] = price
     end
+
+    Rails.logger.info "[🟢 CoinMarketCapFetcher.fetch_prices] - Parsed response #{result}"
+
+    # Aggiorna la tabella Price
+    result.each do |label, new_price|
+      price_record = Price.find_by(label: label)
+      if price_record
+        price_record.update(price: new_price, retrieved_at: Time.current)
+        Rails.logger.info "[🟢 CoinMarketCapFetcher.fetch_prices] - Updated price for #{label}: #{new_price}"
+      else
+        Price.create(label: label, price: new_price, retrieved_at: Time.current, category: 0)
+        Rails.logger.info "[🟢 CoinMarketCapFetcher.fetch_prices] - Created new price record for #{label}: #{new_price}"
+      end
+    end
+
+    result
   end
 end

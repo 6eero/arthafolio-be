@@ -39,9 +39,6 @@ gem 'dotenv-rails', groups: %i[development test]
 gem 'httparty'
 gem 'nokogiri'
 
-gem 'sidekiq'
-gem 'sidekiq-cron'
-
 gem 'bcrypt'
 gem 'jwt'
 
