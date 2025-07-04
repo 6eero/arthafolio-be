@@ -1,9 +1,0 @@
-asset_price_updater:
-  cron: "0 * * * *" # Executed at minute 0 of every hour (13.00, 14.00, ...)
-  class: "AssetPriceUpdaterJob"
-  queue: "default"
-
-create_portfolio_snapshot:
-  cron: "5 * * * *" # Executed at minute 5 of every hour (13.05, 14.05, ...)
-  class: "CreatePortfolioSnapshotJob"
-  queue: "default"

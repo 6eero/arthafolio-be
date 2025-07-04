@@ -16,6 +16,7 @@ class CoinMarketCapFetcher
 
   # Accetta uno o più simboli (stringa singola o array) e restituisce un hash con i prezzi
   def fetch_prices(symbols)
+    Rails.logger.info "📈 symbolss:    #{symbols}"
     symbols = [symbols] if symbols.is_a?(String) # garantisce un array
     query_symbols = symbols.join(',')
 
@@ -27,6 +28,7 @@ class CoinMarketCapFetcher
         convert: 'EUR'
       }
     )
+    Rails.logger.info "📈 response:    #{response}"
 
     return nil unless response.success?
 

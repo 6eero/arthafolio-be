@@ -69,7 +69,30 @@ class PortfolioCalculator
   end
 
   def latest_prices
-    @latest_prices ||= Price.pluck(:label, :price).to_h
+    @latest_prices ||= begin
+      crypto_labels = @holdings.select { |h| h.category == 'crypto' }.map(&:label).uniq
+      etf_labels = @holdings.select { |h| h.category == 'etf' }.map(&:label).uniq
+
+      Rails.logger.info '🔍 Holdings summary:'
+      Rails.logger.info "🪙 Crypto labels: #{crypto_labels.join(', ')}"
+      Rails.logger.info "📈 ETF labels:    #{etf_labels.join(', ')}"
+
+      crypto_prices = {}
+      if crypto_labels.any?
+        begin
+          crypto_prices = CoinMarketCapFetcher.new.fetch_prices(crypto_labels) || {}
+          Rails.logger.info "📈 crypto_prices: #{crypto_prices}"
+        rescue StandardError => e
+          Rails.logger.error "CMC fetch error: #{e.class} - #{e.message}"
+        end
+      end
+
+      # Recupera i prezzi ETF dal database locale (Price model)
+      etf_prices = {}
+      etf_prices = Price.where(label: etf_labels).pluck(:label, :price).to_h if etf_labels.any?
+
+      crypto_prices.merge(etf_prices) # unisce entrambi
+    end
   end
 
   # Returns the last 24 portfolio snapshots, order by creation time, as an array of hashes.
