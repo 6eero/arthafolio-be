@@ -32,7 +32,7 @@ until psql "sslmode=$PGSSLMODE dbname=$PGDATABASE host=$PGHOST user=$PGUSER pass
 done
 
 echo "✅ Database is up - setting up DB from scratch"
-bundle exec rake db:setup
+DISABLE_DATABASE_ENVIRONMENT_CHECK=1 bundle exec rake db:setup
 
 echo "🚀 Starting Rails server..."
 exec bundle exec rails server -b 0.0.0.0 -p 3000
