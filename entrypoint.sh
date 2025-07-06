@@ -31,8 +31,8 @@ until psql "sslmode=$PGSSLMODE dbname=$PGDATABASE host=$PGHOST user=$PGUSER pass
   sleep 2
 done
 
-echo "✅ Database is up - running migrations"
-bundle exec rake db:prepare
+echo "✅ Database is up - setting up DB from scratch"
+bundle exec rake db:setup
 
 echo "🚀 Starting Rails server..."
 exec bundle exec rails server -b 0.0.0.0 -p 3000
