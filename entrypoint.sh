@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+rm -f /app/tmp/pids/server.pid
+
 echo "🔧 Waiting for database to become available..."
 
 # Se DATABASE_URL è presente (es. in produzione), la scompone
@@ -31,8 +33,8 @@ until psql "sslmode=$PGSSLMODE dbname=$PGDATABASE host=$PGHOST user=$PGUSER pass
   sleep 2
 done
 
-echo "✅ Database is up - setting up DB from scratch"
-DISABLE_DATABASE_ENVIRONMENT_CHECK=1 bundle exec rake db:setup
+echo "✅ Database is up - running migrations"
+bundle exec rake db:prepare
 
 echo "🚀 Starting Rails server..."
 exec bundle exec rails server -b 0.0.0.0 -p 3000
