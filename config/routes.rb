@@ -11,6 +11,6 @@ Rails.application.routes.draw do
     delete 'logout', to: 'sessions#logout'
     get 'who_am_i', to: 'users#who_am_i'
 
-    resources :holdings, only: %i[index create destroy]
+    resources :holdings, only: %i[index create destroy update]
   end
 end

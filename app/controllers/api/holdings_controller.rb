@@ -44,6 +44,30 @@ module Api
       end
     end
 
+    def update
+      holding = Holding.find_by(label: params[:id])
+
+      if holding.nil?
+        render json: { error: 'Holding not found' }, status: :not_found
+        return
+      end
+
+      if holding.update(holding_params)
+        # (Opzionale) aggiorna anche il prezzo se serve
+        fetch_and_store_price_for(holding) if holding.category == 'crypto'
+
+        holdings = Holding.all
+        portfolio = PortfolioCalculator.new(holdings)
+
+        render json: {
+          assets: portfolio.assets,
+          totals: portfolio.totals
+        }, status: :ok
+      else
+        render json: { errors: holding.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+
     private
 
     def holding_params
