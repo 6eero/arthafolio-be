@@ -12,10 +12,6 @@ class PortfolioCalculator
     @assets ||= build_assets
   end
 
-  def history
-    @history ||= fetch_history
-  end
-
   def totals
     {
       crypto: crypto_total.to_f.round(2),
@@ -88,16 +84,6 @@ class PortfolioCalculator
       etf_prices = Price.where(label: etf_labels).pluck(:label, :price).to_h if etf_labels.any?
 
       crypto_prices.merge(etf_prices) # unisce entrambi
-    end
-  end
-
-  # Returns the last 24 portfolio snapshots, order by creation time, as an array of hashes.
-  def fetch_history
-    PortfolioSnapshot.order(created_at: :asc).last(24).map do |snapshot|
-      {
-        value: snapshot.value.to_f,
-        retrieved_at: snapshot.created_at
-      }
     end
   end
 end
