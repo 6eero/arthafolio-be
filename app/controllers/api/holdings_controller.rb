@@ -14,6 +14,9 @@ module Api
       holding = Holding.new(holding_params)
 
       if holding.save
+        # Fetch price right after saving the holding
+        fetch_and_store_price_for(holding)
+
         holdings = Holding.all
         portfolio = PortfolioCalculator.new(holdings)
         render json: {
@@ -47,6 +50,15 @@ module Api
 
     def holding_params
       params.require(:holding).permit(%i[label quantity category])
+    end
+
+    def fetch_and_store_price_for(holding)
+      if holding.category == 'crypto'
+        CoinMarketCapFetcher.new.fetch_prices(holding.label)
+      else
+        # TODO
+        Rails.logger.info "No fetch needed for ETF: #{holding.label}"
+      end
     end
   end
 end
