@@ -39,7 +39,7 @@ class PortfolioCalculator
         category: h.category,
         percentage: percentage
       )
-    end
+    end.sort_by { |a| -a.percentage }
   end
 
   def price_for(holding)
