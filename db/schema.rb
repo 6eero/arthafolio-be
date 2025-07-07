@@ -10,44 +10,38 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_06_204700) do
+ActiveRecord::Schema[8.0].define(version: 20_250_706_204_700) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "pg_catalog.plpgsql"
+  enable_extension 'pg_catalog.plpgsql'
 
-  create_table "holdings", force: :cascade do |t|
-    t.integer "category"
-    t.string "label"
-    t.decimal "quantity"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+  create_table 'holdings', force: :cascade do |t|
+    t.integer 'category'
+    t.string 'label'
+    t.decimal 'quantity'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
   end
 
-  create_table "portfolio_snapshots", force: :cascade do |t|
-    t.decimal "value"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+  create_table 'prices', force: :cascade do |t|
+    t.integer 'category'
+    t.string 'label'
+    t.decimal 'price'
+    t.datetime 'retrieved_at'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.bigint 'holding_id', null: false
+    t.index ['holding_id'], name: 'index_prices_on_holding_id'
   end
 
-  create_table "prices", force: :cascade do |t|
-    t.integer "category"
-    t.string "label"
-    t.decimal "price"
-    t.datetime "retrieved_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "holding_id", null: false
-    t.index ["holding_id"], name: "index_prices_on_holding_id"
+  create_table 'users', force: :cascade do |t|
+    t.string 'email', default: '', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.string 'password_digest'
+    t.string 'refresh_token'
+    t.index ['email'], name: 'index_users_on_email', unique: true
+    t.index ['refresh_token'], name: 'index_users_on_refresh_token', unique: true
   end
 
-  create_table "users", force: :cascade do |t|
-    t.string "email", default: "", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "password_digest"
-    t.string "refresh_token"
-    t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["refresh_token"], name: "index_users_on_refresh_token", unique: true
-  end
-
-  add_foreign_key "prices", "holdings"
+  add_foreign_key 'prices', 'holdings'
 end
