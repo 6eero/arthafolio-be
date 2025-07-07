@@ -7,7 +7,7 @@ module Api
       holdings = Holding.all
       portfolio = PortfolioCalculator.new(holdings)
 
-      render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }
+      render json: { assets: portfolio.assets, totals: portfolio.totals }
     end
 
     def create
@@ -21,8 +21,7 @@ module Api
         portfolio = PortfolioCalculator.new(holdings)
         render json: {
           assets: portfolio.assets,
-          totals: portfolio.totals,
-          history: portfolio.history
+          totals: portfolio.totals
         }, status: :created
       else
         render json: { errors: holding.errors.full_messages }, status: :unprocessable_entity
@@ -38,8 +37,7 @@ module Api
         portfolio = PortfolioCalculator.new(holdings)
         render json: {
           assets: portfolio.assets,
-          totals: portfolio.totals,
-          history: portfolio.history
+          totals: portfolio.totals
         }, status: :ok
       else
         render json: { error: 'Holding not found' }, status: :not_found
