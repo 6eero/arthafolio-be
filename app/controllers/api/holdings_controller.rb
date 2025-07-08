@@ -11,13 +11,13 @@ module Api
     end
 
     def create
-      holding = Holding.new(holding_params)
+      holding = current_user.holdings.new(holding_params)
 
       if holding.save
         # Fetch price right after saving the holding
         fetch_and_store_price_for(holding)
 
-        holdings = Holding.all
+        holdings = current_user.holdings
         portfolio = PortfolioCalculator.new(holdings)
         render json: {
           assets: portfolio.assets,
