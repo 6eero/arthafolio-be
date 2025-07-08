@@ -4,9 +4,8 @@ module Api
   # Handles API requests related to user holdings and portfolio data.
   class HoldingsController < ApplicationController
     def index
-      holdings = Holding.all
+      holdings = current_user.holdings
       portfolio = PortfolioCalculator.new(holdings)
-
       render json: { assets: portfolio.assets, totals: portfolio.totals }
     end
 
@@ -19,36 +18,31 @@ module Api
 
         holdings = current_user.holdings
         portfolio = PortfolioCalculator.new(holdings)
-        render json: {
-          assets: portfolio.assets,
-          totals: portfolio.totals
-        }, status: :created
+        render json: { assets: portfolio.assets, totals: portfolio.totals }, status: :created
       else
         render json: { errors: holding.errors.full_messages }, status: :unprocessable_entity
       end
     end
 
     def destroy
-      holding = Holding.find_by(label: params[:id])
+      holding = find_holding
 
-      if holding
-        holding.destroy
-        holdings = Holding.all
-        portfolio = PortfolioCalculator.new(holdings)
-        render json: {
-          assets: portfolio.assets,
-          totals: portfolio.totals
-        }, status: :ok
-      else
-        render json: { error: 'Holding not found' }, status: :not_found
+      unless holding
+        render json: { error: 'Holding not found or not authorized' }, status: :not_found
+        return
       end
+
+      holding.destroy
+      holdings = current_user.holdings
+      portfolio = PortfolioCalculator.new(holdings)
+      render json: { assets: portfolio.assets, totals: portfolio.totals }, status: :ok
     end
 
     def update
-      holding = Holding.find_by(label: params[:id])
+      holding = find_holding
 
-      if holding.nil?
-        render json: { error: 'Holding not found' }, status: :not_found
+      unless holding
+        render json: { error: 'Holding not found or not authorized' }, status: :not_found
         return
       end
 
@@ -56,7 +50,7 @@ module Api
         # (Opzionale) aggiorna anche il prezzo se serve
         fetch_and_store_price_for(holding) if holding.category == 'crypto'
 
-        holdings = Holding.all
+        holdings = current_user.holdings
         portfolio = PortfolioCalculator.new(holdings)
 
         render json: {
@@ -69,6 +63,10 @@ module Api
     end
 
     private
+
+    def find_holding
+      current_user.holdings.find_by(label: params[:id])
+    end
 
     def holding_params
       params.require(:holding).permit(%i[label quantity category])
