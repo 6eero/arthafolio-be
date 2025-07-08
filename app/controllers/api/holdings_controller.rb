@@ -4,7 +4,9 @@ module Api
   # Handles API requests related to user holdings and portfolio data.
   class HoldingsController < ApplicationController
     def index
-      holdings = current_user.holdings
+      Rails.logger.info "Current user ID: #{current_user&.id}"
+      holdings = current_user.holdings.to_a
+      Rails.logger.info "Holdings count for user #{current_user&.id}: #{holdings.size}"
       portfolio = PortfolioCalculator.new(holdings)
       render json: { assets: portfolio.assets, totals: portfolio.totals }
     end
