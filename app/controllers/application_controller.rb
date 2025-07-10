@@ -3,8 +3,6 @@ class ApplicationController < ActionController::API
 
   before_action :authenticate_request
 
-  attr_reader :current_user
-
   private
 
   def authenticate_request
@@ -26,5 +24,7 @@ class ApplicationController < ActionController::API
     end
   end
 
-  attr_reader :current_user
+  def current_user
+    @current_user
+  end
 end
