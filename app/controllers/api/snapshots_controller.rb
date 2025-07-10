@@ -4,6 +4,7 @@ module Api
     before_action :ensure_system_user
 
     def create
+      Rails.logger.info "🟢 Called by: #{current_user&.email}"
       PortfolioSnapshotService.snapshot_for_all_users
       render json: { message: 'Snapshot completato' }, status: :ok
     end
