@@ -10,4 +10,5 @@ class User < ApplicationRecord
   validates :password, length: { minimum: 6 }, if: -> { new_record? || !password.nil? }
 
   has_many :holdings, dependent: :destroy
+  has_many :portfolio_snapshots, dependent: :destroy
 end

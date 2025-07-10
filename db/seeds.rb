@@ -3,9 +3,6 @@ User.destroy_all
 Holding.destroy_all
 Price.destroy_all
 
-User.create!(
-  email: 'alice@example.com',
-  password: 'password123',
-  password_confirmation: 'password123',
-  refresh_token: SecureRandom.hex(16)
-)
+User.find_or_create_by!(email: 'cron@yourapp.com') do |u|
+  u.password = SecureRandom.hex(16)
+end

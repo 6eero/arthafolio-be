@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_08_191104) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_10_204643) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_08_191104) do
   create_table "playing_with_neon", id: :serial, force: :cascade do |t|
     t.text "name", null: false
     t.float "value", limit: 24
+  end
+
+  create_table "portfolio_snapshots", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.jsonb "holdings_data"
+    t.decimal "total_value"
+    t.datetime "taken_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_portfolio_snapshots_on_user_id"
   end
 
   create_table "prices", force: :cascade do |t|
@@ -51,5 +61,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_08_191104) do
   end
 
   add_foreign_key "holdings", "users"
+  add_foreign_key "portfolio_snapshots", "users"
   add_foreign_key "prices", "holdings"
 end
