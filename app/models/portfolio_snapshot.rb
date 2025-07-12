@@ -1,3 +1,3 @@
-class PortfolioSnapshot < ApplicationRecord
+class PortfolioSnapshotService < ApplicationRecord
   belongs_to :user
 end

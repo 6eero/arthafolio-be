@@ -10,7 +10,7 @@ module Api
       PriceUpdater.update_all_stale_prices
 
       # 2. Crea lo snapshot per tutti gli utenti (questo servizio può rimanere quasi uguale)
-      PortfolioSnapshot.snapshot_for_all_users
+      PortfolioSnapshotService.snapshot_for_all_users
 
       render json: { message: 'Snapshot completato per tutti gli utenti' }, status: :ok
     end

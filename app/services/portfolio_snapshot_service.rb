@@ -2,7 +2,7 @@
 
 Rails.logger.info ">>> TENTATIVO DI CARICAMENTO DI portfolio_snapshot.rb <<<"
 
-class PortfolioSnapshot
+class PortfolioSnapshotService
   def self.snapshot_for_all_users
     User.find_each do |user|
       new(user).snapshot
