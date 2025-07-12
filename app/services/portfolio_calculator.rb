@@ -15,7 +15,7 @@ class PortfolioCalculator
 
     snapshots.map do |snapshot|
       {
-        total_value: snapshot.total_value.to_f,
+        total_value: snapshot.total_value.to_f.round(2),
         taken_at: snapshot.taken_at
       }
     end
