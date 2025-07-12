@@ -1,7 +1,4 @@
 # app/services/portfolio_snapshot.rb
-
-Rails.logger.info ">>> TENTATIVO DI CARICAMENTO DI portfolio_snapshot.rb <<<"
-
 class PortfolioSnapshotService
   def self.snapshot_for_all_users
     User.find_each do |user|
@@ -14,11 +11,11 @@ class PortfolioSnapshotService
   end
 
   def snapshot
-    holdings = @user.holdings.includes(:prices)
+    holdings = @user.holdings.includes(coin: :prices)
     return if holdings.empty?
 
     latest_prices = holdings.map do |h|
-      latest_price = h.prices.order(retrieved_at: :desc).first
+      latest_price = h.coin.prices.order(retrieved_at: :desc).first
       next unless latest_price
 
       {
