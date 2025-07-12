@@ -1,3 +1,7 @@
+# app/services/portfolio_snapshot.rb
+
+Rails.logger.info ">>> TENTATIVO DI CARICAMENTO DI portfolio_snapshot.rb <<<"
+
 class PortfolioSnapshot
   def self.snapshot_for_all_users
     User.find_each do |user|
