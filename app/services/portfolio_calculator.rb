@@ -1,6 +1,3 @@
-# frozen_string_literal: true
-
-# app/services/portfolio_calculator.rb
 class PortfolioCalculator
   Asset = Struct.new(:label, :quantity, :price, :value, :category, :percentage, keyword_init: true)
 
@@ -27,7 +24,7 @@ class PortfolioCalculator
 
     @holdings.map do |h|
       quantity = h.quantity.to_f
-      price = price_for(h).to_f.round(2)
+      price = latest_price_for(h.label).to_f.round(2)
       value = (quantity * price).to_f.round(2)
       percentage = grand_total.positive? ? (100.0 * value / grand_total).round(2) : 0
 
@@ -42,8 +39,12 @@ class PortfolioCalculator
     end.sort_by { |a| -a.percentage }
   end
 
-  def price_for(holding)
-    latest_prices[holding.label] || 0
+  def latest_price_for(label)
+    @latest_prices ||= Price.where(label: @holdings.map(&:label).uniq)
+                            .order(retrieved_at: :desc)
+                            .group_by(&:label)
+                            .transform_values(&:first)
+    @latest_prices[label]&.price || 0
   end
 
   def grand_total
@@ -61,29 +62,6 @@ class PortfolioCalculator
   def calculate_total_for_category(category)
     @holdings
       .select { |h| h.category == category }
-      .sum { |h| h.quantity.to_f * price_for(h) }
-  end
-
-  def latest_prices
-    @latest_prices ||= begin
-      crypto_labels = @holdings.select { |h| h.category == 'crypto' }.map(&:label).uniq
-      etf_labels = @holdings.select { |h| h.category == 'etf' }.map(&:label).uniq
-
-      crypto_prices = {}
-      if crypto_labels.any?
-        begin
-          crypto_prices = CoinMarketCapFetcher.new.fetch_prices(crypto_labels) || {}
-          Rails.logger.info "🟢 PortfolioCalculator.latest_prices - crypto_prices #{crypto_prices}"
-        rescue StandardError => e
-          Rails.logger.error "CMC fetch error: #{e.class} - #{e.message}"
-        end
-      end
-
-      # Recupera i prezzi ETF dal database locale (Price model)
-      etf_prices = {}
-      etf_prices = Price.where(label: etf_labels).pluck(:label, :price).to_h if etf_labels.any?
-
-      crypto_prices.merge(etf_prices) # unisce entrambi
-    end
+      .sum { |h| h.quantity.to_f * latest_price_for(h.label) }
   end
 end

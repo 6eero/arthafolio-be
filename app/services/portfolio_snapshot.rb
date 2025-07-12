@@ -1,4 +1,4 @@
-class PortfolioSnapshotService
+class PortfolioSnapshot
   def self.snapshot_for_all_users
     User.find_each do |user|
       new(user).snapshot
