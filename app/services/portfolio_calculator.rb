@@ -1,12 +1,24 @@
 class PortfolioCalculator
   Asset = Struct.new(:label, :quantity, :price, :value, :category, :percentage, keyword_init: true)
 
-  def initialize(holdings)
+  def initialize(holdings, user)
     @holdings = holdings
+    @user = user
   end
 
   def assets
     @assets ||= build_assets
+  end
+
+  def history
+    snapshots = @user.portfolio_snapshots.order(created_at: :asc)
+
+    snapshots.map do |snapshot|
+      {
+        total_value: snapshot.total_value.to_f,
+        taken_at: snapshot.taken_at
+      }
+    end
   end
 
   def totals

@@ -2,8 +2,8 @@ module Api
   class HoldingsController < ApplicationController
     def index
       holdings = current_user.holdings.to_a
-      portfolio = PortfolioCalculator.new(holdings)
-      render json: { assets: portfolio.assets, totals: portfolio.totals }
+      portfolio = PortfolioCalculator.new(holdings, current_user)
+      render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }
     end
 
     def create
