@@ -1,24 +1,43 @@
-# README
+# 🧠 Arthafolio Backend
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is the backend codebase for **Arthafolio**, a cryptocurrency portfolio tracker built with Rails and PostgreSQL. It integrates with the CoinMarketCap API to fetch real-time crypto data and provides endpoints to support a frontend client. The backend is containerized using Docker for easier local development and production deployment.
 
-Things you may want to cover:
+---
 
-* Ruby version
+## 🚀 How to Deploy
 
-* System dependencies
+Follow these steps to set up and run the backend locally or in production.
 
-* Configuration
+### 1. Clone the Repository
 
-* Database creation
+```bash
+git clone https://github.com/6eero/arthafolio-be.git
+cd arthafolio-be
+```
 
-* Database initialization
+### 2. Set Up Environment Variables
 
-* How to run the test suite
+Edit the `.env.example` file and fill in the required values:
 
-* Services (job queues, cache servers, search engines, etc.)
+```env
+RAILS_ENV=            # "development" or "production"
+CMC_API_KEY=          # Your CoinMarketCap API key
+DATABASE_URL=         # e.g., postgres://user:password@host:port/dbname
+```
 
-* Deployment instructions
+Then copy the example file to the correct environment file:
 
-* ...
+```bash
+cp .env.example .env.development   # For development
+cp .env.example .env.production    # For production
+```
+
+### 3. Run the Application
+
+Use Docker Compose to build and run the containers:
+
+```bash
+ENV_FILE=.env.<environment> docker-compose up --build
+```
+
+Replace `<environment>` with either `development` or `production` depending on your setup.
