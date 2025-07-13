@@ -1,7 +1,8 @@
 services:
   web:
     build: .
-    env_file: .env
+    env_file:
+      - ${ENV_FILE:-env.development}
     volumes:
       - .:/app
     ports:

@@ -11,6 +11,7 @@
 /.env
 /.env.local
 /.env.neon
+/env.*
 
 # Ignore all logfiles and tempfiles.
 /log/*
