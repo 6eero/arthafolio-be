@@ -13,8 +13,9 @@ module Api
         PriceUpdater.update_prices_from_api([holding.label])
 
         holdings = current_user.holdings
-        portfolio = PortfolioCalculator.new(holdings)
-        render json: { assets: portfolio.assets, totals: portfolio.totals }, status: :created
+        portfolio = PortfolioCalculator.new(holdings, current_user)
+        render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history },
+               status: :created
       else
         render json: { errors: holding.errors.full_messages }, status: :unprocessable_entity
       end
@@ -30,8 +31,8 @@ module Api
 
       if holding.update(holding_params)
         holdings = current_user.holdings
-        portfolio = PortfolioCalculator.new(holdings)
-        render json: { assets: portfolio.assets, totals: portfolio.totals }, status: :ok
+        portfolio = PortfolioCalculator.new(holdings, current_user)
+        render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }, status: :ok
       else
         render json: { errors: holding.errors.full_messages }, status: :unprocessable_entity
       end
@@ -47,8 +48,8 @@ module Api
 
       holding.destroy
       holdings = current_user.holdings
-      portfolio = PortfolioCalculator.new(holdings)
-      render json: { assets: portfolio.assets, totals: portfolio.totals }, status: :ok
+      portfolio = PortfolioCalculator.new(holdings, current_user)
+      render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }, status: :ok
     end
 
     private
