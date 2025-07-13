@@ -11,7 +11,7 @@ class PortfolioCalculator
   end
 
   def history
-    snapshots = @user.portfolio_snapshots.order(created_at: :asc)
+    snapshots = @user.portfolio_snapshots.order(created_at: :asc).limit(20)
 
     snapshots.map do |snapshot|
       {
