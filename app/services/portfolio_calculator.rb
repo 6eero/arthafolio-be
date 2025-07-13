@@ -1,3 +1,22 @@
+# PortfolioCalculator is a service class responsible for calculating portfolio-related
+# data for a user. It operates on a collection of asset holdings and provides:
+#
+# - A list of assets with detailed metrics such as value, category, and percentage share.
+# - Historical portfolio values based on user snapshots (limited to the most recent 20).
+# - Totals for crypto, ETF, and combined asset values.
+#
+# This class is read-only and is designed to support portfolio summaries, analytics,
+# or dashboards without persisting any state.
+#
+# Example usage:
+#   calculator = PortfolioCalculator.new(user.holdings, user)
+#   calculator.assets    # => [<Asset label: "BTC", value: 1000.0, ...>, ...]
+#   calculator.history   # => [{ total_value: 1234.56, taken_at: <Time> }, ...]
+#   calculator.totals    # => { crypto: 1000.0, etf: 500.0, total: 1500.0 }
+#
+# Note:
+# - Asset prices are fetched from the most recent available data (Price model).
+# - Percentages are relative to the total portfolio value.
 class PortfolioCalculator
   Asset = Struct.new(:label, :quantity, :price, :value, :category, :percentage, keyword_init: true)
 
