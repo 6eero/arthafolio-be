@@ -11,7 +11,8 @@ module Api
     skip_before_action :authenticate_request, only: [:login]
 
     def login
-      # 1. Cerca l'utente per email
+      # 1.  Accetta un parametro generico :login dal frontend e cerca l'utente per email o per username
+      params[:login].downcase
       @user = User.find_by(email: params[:email])
 
       # 2. Verifica che l'utente esista e che la password sia corretta
