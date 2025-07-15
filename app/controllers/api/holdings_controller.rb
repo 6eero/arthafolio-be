@@ -29,7 +29,8 @@ module Api
   class HoldingsController < ApplicationController
     def index
       holdings = current_user.holdings.to_a
-      portfolio = PortfolioCalculator.new(holdings, current_user)
+      timeframe = params[:timeframe] || 'D'
+      portfolio = PortfolioCalculator.new(holdings, current_user, timeframe)
       render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }
     end
 
@@ -40,7 +41,8 @@ module Api
         PriceUpdater.update_prices_from_api([holding.label])
 
         holdings = current_user.holdings
-        portfolio = PortfolioCalculator.new(holdings, current_user)
+        timeframe = params[:timeframe] || 'D'
+        portfolio = PortfolioCalculator.new(holdings, current_user, timeframe)
         render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history },
                status: :created
       else
@@ -58,7 +60,8 @@ module Api
 
       if holding.update(holding_params)
         holdings = current_user.holdings
-        portfolio = PortfolioCalculator.new(holdings, current_user)
+        timeframe = params[:timeframe] || 'D'
+        portfolio = PortfolioCalculator.new(holdings, current_user, timeframe)
         render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }, status: :ok
       else
         render json: { errors: holding.errors.full_messages }, status: :unprocessable_entity
@@ -75,7 +78,8 @@ module Api
 
       holding.destroy
       holdings = current_user.holdings
-      portfolio = PortfolioCalculator.new(holdings, current_user)
+      timeframe = params[:timeframe] || 'D'
+      portfolio = PortfolioCalculator.new(holdings, current_user, timeframe)
       render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }, status: :ok
     end
 

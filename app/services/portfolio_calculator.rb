@@ -20,9 +20,10 @@
 class PortfolioCalculator
   Asset = Struct.new(:label, :quantity, :price, :value, :category, :percentage, keyword_init: true)
 
-  def initialize(holdings, user)
+  def initialize(holdings, user, timeframe)
     @holdings = holdings
     @user = user
+    @timeframe = timeframe
   end
 
   def assets
@@ -30,14 +31,35 @@ class PortfolioCalculator
   end
 
   def history
-    snapshots = @user.portfolio_snapshots.order(created_at: :asc).limit(20)
+    snapshots = @user.portfolio_snapshots.order(taken_at: :desc)
 
-    snapshots.map do |snapshot|
-      {
-        total_value: snapshot.total_value.to_f.round(2),
-        taken_at: snapshot.taken_at
-      }
-    end
+    grouped = case @timeframe&.upcase
+              when 'H'
+                Rails.logger.debug('Raggruppamento per ora')
+                snapshots.group_by { |s| s.taken_at.beginning_of_hour }
+              when 'D', nil
+                Rails.logger.debug('Raggruppamento per giorno')
+                snapshots.group_by { |s| s.taken_at.to_date }
+              when 'W'
+                Rails.logger.debug('Raggruppamento per settimana')
+                snapshots.group_by { |s| s.taken_at.beginning_of_week(:monday).to_date }
+              when 'M'
+                Rails.logger.debug('Raggruppamento per mese')
+                snapshots.group_by { |s| s.taken_at.beginning_of_month.to_date }
+              else
+                Rails.logger.warn("Timeframe sconosciuto: #{@timeframe}")
+                snapshots.group_by { |s| s.taken_at.to_date }
+              end
+
+    grouped.values.map(&:first)
+           .sort_by(&:taken_at)
+           .last(20)
+           .map do |snapshot|
+             {
+               total_value: snapshot.total_value.to_f.round(2),
+               taken_at: snapshot.taken_at
+             }
+           end
   end
 
   def totals
