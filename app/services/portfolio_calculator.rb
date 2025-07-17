@@ -59,15 +59,14 @@ class PortfolioCalculator
 
   def totals
     current_total = crypto_total.to_f.round(2)
-    yesterday_total = total_value_24h_ago
+    yesterday_total = total_value_on(Date.yesterday)
 
     pl_value = (current_total - yesterday_total).round(2)
     pl_percent = yesterday_total.positive? ? ((pl_value / yesterday_total) * 100).round(2) : 0
 
     {
       total: current_total,
-      profit_loss_value: pl_value,
-      profit_loss_percent: pl_percent
+      profit_loss: { value: pl_value, percent: pl_percent }
     }
   end
 
@@ -111,12 +110,12 @@ class PortfolioCalculator
       .sum { |h| h.quantity.to_f * latest_price_for(h.label) }
   end
 
-  def total_value_24h_ago
-    # Cerca lo snapshot più vicino a 24h fa, massimo con 1h di tolleranza
-    target_time = 24.hours.ago
+  def total_value_on(date)
+    day_start = date.beginning_of_day
+    day_end = date.end_of_day
 
     snapshot = @user.portfolio_snapshots
-                    .where('taken_at <= ?', target_time)
+                    .where(taken_at: day_start...day_end)
                     .order(taken_at: :desc)
                     .first
 
