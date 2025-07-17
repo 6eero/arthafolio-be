@@ -35,19 +35,14 @@ class PortfolioCalculator
 
     grouped = case @timeframe&.upcase
               when 'H'
-                Rails.logger.debug('Raggruppamento per ora')
                 snapshots.group_by { |s| s.taken_at.beginning_of_hour }
               when 'D', nil
-                Rails.logger.debug('Raggruppamento per giorno')
                 snapshots.group_by { |s| s.taken_at.to_date }
               when 'W'
-                Rails.logger.debug('Raggruppamento per settimana')
                 snapshots.group_by { |s| s.taken_at.beginning_of_week(:monday).to_date }
               when 'M'
-                Rails.logger.debug('Raggruppamento per mese')
                 snapshots.group_by { |s| s.taken_at.beginning_of_month.to_date }
               else
-                Rails.logger.warn("Timeframe sconosciuto: #{@timeframe}")
                 snapshots.group_by { |s| s.taken_at.to_date }
               end
 
@@ -63,23 +58,29 @@ class PortfolioCalculator
   end
 
   def totals
+    current_total = crypto_total.to_f.round(2)
+    yesterday_total = total_value_24h_ago
+
+    pl_value = (current_total - yesterday_total).round(2)
+    pl_percent = yesterday_total.positive? ? ((pl_value / yesterday_total) * 100).round(2) : 0
+
     {
-      crypto: crypto_total.to_f.round(2),
-      etf: etf_total.to_f.round(2),
-      total: grand_total.to_f.round(2)
+      total: current_total,
+      profit_loss_value: pl_value,
+      profit_loss_percent: pl_percent
     }
   end
 
   private
 
   def build_assets
-    return [] if grand_total.zero?
+    return [] if crypto_total.zero?
 
     @holdings.map do |h|
       quantity = h.quantity.to_f
       price = latest_price_for(h.label).to_f.round(2)
       value = (quantity * price).to_f.round(2)
-      percentage = grand_total.positive? ? (100.0 * value / grand_total).round(2) : 0
+      percentage = crypto_total.positive? ? (100.0 * value / crypto_total).round(2) : 0
 
       Asset.new(
         label: h.label,
@@ -100,21 +101,25 @@ class PortfolioCalculator
     @latest_prices[label]&.price || 0
   end
 
-  def grand_total
-    @grand_total ||= crypto_total + etf_total
-  end
-
   def crypto_total
     @crypto_total ||= calculate_total_for_category('crypto')
-  end
-
-  def etf_total
-    @etf_total ||= calculate_total_for_category('etf')
   end
 
   def calculate_total_for_category(category)
     @holdings
       .select { |h| h.category == category }
       .sum { |h| h.quantity.to_f * latest_price_for(h.label) }
+  end
+
+  def total_value_24h_ago
+    # Cerca lo snapshot più vicino a 24h fa, massimo con 1h di tolleranza
+    target_time = 24.hours.ago
+
+    snapshot = @user.portfolio_snapshots
+                    .where('taken_at <= ?', target_time)
+                    .order(taken_at: :desc)
+                    .first
+
+    snapshot&.total_value.to_f.round(2) || 0
   end
 end
