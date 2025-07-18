@@ -59,14 +59,23 @@ class PortfolioCalculator
 
   def totals
     current_total = crypto_total.to_f.round(2)
-    yesterday_total = total_value_on(Date.yesterday)
 
-    pl_value = (current_total - yesterday_total).round(2)
-    pl_percent = yesterday_total.positive? ? ((pl_value / yesterday_total) * 100).round(2) : 0
+    periods = {
+      day: Date.yesterday,
+      week: 1.week.ago.to_date,
+      month: 1.month.ago.to_date
+    }
+
+    profit_loss = periods.transform_values do |date|
+      previous_total = total_value_on(date).to_f
+      value = (current_total - previous_total).round(2)
+      percent = previous_total.positive? ? ((value / previous_total) * 100).round(2) : 0
+      { value: value, percent: percent }
+    end
 
     {
       total: current_total,
-      profit_loss: { value: pl_value, percent: pl_percent }
+      profit_loss: profit_loss
     }
   end
 
