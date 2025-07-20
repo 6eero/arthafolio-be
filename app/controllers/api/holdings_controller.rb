@@ -28,10 +28,7 @@ module Api
   # }
   class HoldingsController < ApplicationController
     def index
-      holdings = current_user.holdings.to_a
-      timeframe = params[:timeframe] || 'D'
-      portfolio = PortfolioCalculator.new(holdings, current_user, timeframe)
-      render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }
+      render_portfolio
     end
 
     def create
@@ -39,12 +36,7 @@ module Api
 
       if holding.save
         PriceUpdater.update_prices_from_api([holding.label])
-
-        holdings = current_user.holdings
-        timeframe = params[:timeframe] || 'D'
-        portfolio = PortfolioCalculator.new(holdings, current_user, timeframe)
-        render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history },
-               status: :created
+        render_portfolio(status: :created)
       else
         render json: { errors: holding.errors.full_messages }, status: :unprocessable_entity
       end
@@ -59,10 +51,7 @@ module Api
       end
 
       if holding.update(holding_params)
-        holdings = current_user.holdings
-        timeframe = params[:timeframe] || 'D'
-        portfolio = PortfolioCalculator.new(holdings, current_user, timeframe)
-        render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }, status: :ok
+        render_portfolio(status: :ok)
       else
         render json: { errors: holding.errors.full_messages }, status: :unprocessable_entity
       end
@@ -77,10 +66,7 @@ module Api
       end
 
       holding.destroy
-      holdings = current_user.holdings
-      timeframe = params[:timeframe] || 'D'
-      portfolio = PortfolioCalculator.new(holdings, current_user, timeframe)
-      render json: { assets: portfolio.assets, totals: portfolio.totals, history: portfolio.history }, status: :ok
+      render_portfolio(status: :ok)
     end
 
     private
@@ -90,7 +76,21 @@ module Api
     end
 
     def holding_params
-      params.expect(holding: %i[label quantity category])
+      params.require(:holding).permit(:label, :quantity, :category)
+    end
+
+    def render_portfolio(status: :ok)
+      holdings = current_user.holdings.to_a
+      timeframe = params[:timeframe] || 'D'
+      currency = (current_user.preferred_currency || 'eur').downcase
+
+      portfolio = PortfolioCalculator.new(holdings, current_user, timeframe, currency)
+
+      render json: {
+        assets: portfolio.assets,
+        totals: portfolio.totals,
+        history: portfolio.history
+      }, status: status
     end
   end
 end

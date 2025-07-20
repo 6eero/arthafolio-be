@@ -20,10 +20,12 @@
 class PortfolioCalculator
   Asset = Struct.new(:label, :quantity, :price, :value, :category, :percentage, keyword_init: true)
 
-  def initialize(holdings, user, timeframe)
+  def initialize(holdings, user, timeframe, currency)
     @holdings = holdings
     @user = user
     @timeframe = timeframe
+    @currency = currency
+    @conversion_rate = currency == 'eur' ? 1.0 : ConversionFetcher.fetch(currency)
   end
 
   def assets
@@ -51,14 +53,14 @@ class PortfolioCalculator
            .last(20)
            .map do |snapshot|
              {
-               total_value: snapshot.total_value.to_f.round(2),
+               total_value: (snapshot.total_value.to_f * @conversion_rate).round(2),
                taken_at: snapshot.taken_at
              }
            end
   end
 
   def totals
-    current_total = crypto_total.to_f.round(2)
+    current_total = crypto_total.to_f * @conversion_rate
 
     periods = {
       day: Date.yesterday,
@@ -67,14 +69,14 @@ class PortfolioCalculator
     }
 
     profit_loss = periods.transform_values do |date|
-      previous_total = total_value_on(date).to_f
+      previous_total = total_value_on(date).to_f * @conversion_rate
       value = (current_total - previous_total).round(2)
       percent = previous_total.positive? ? ((value / previous_total) * 100).round(2) : 0
       { value: value, percent: percent }
     end
 
     {
-      total: current_total,
+      total: current_total.round(2),
       profit_loss: profit_loss
     }
   end
@@ -86,9 +88,9 @@ class PortfolioCalculator
 
     @holdings.map do |h|
       quantity = h.quantity.to_f
-      price = latest_price_for(h.label).to_f.round(2)
+      price = (latest_price_for(h.label).to_f * @conversion_rate).round(2)
       value = (quantity * price).to_f.round(2)
-      percentage = crypto_total.positive? ? (100.0 * value / crypto_total).round(2) : 0
+      percentage = crypto_total.positive? ? (100.0 * value / (crypto_total * @conversion_rate)).round(2) : 0
 
       Asset.new(
         label: h.label,

@@ -31,5 +31,10 @@ done
 echo "✅ Database is up - running migrations"
 bundle exec rake db:prepare
 
+if [ "$RAILS_ENV" = "development" ]; then
+  echo "🌱 Seeding the database (development only)..."
+  bundle exec rails db:seed
+fi
+
 echo "🚀 Starting Rails server..."
 exec bundle exec rails server -b 0.0.0.0 -p 3000
