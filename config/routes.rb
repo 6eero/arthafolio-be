@@ -7,9 +7,12 @@ Rails.application.routes.draw do
   # Namespace per le API
   namespace :api do
     post 'login', to: 'sessions#login'
-    post 'refresh', to: 'refresh#create'
     delete 'logout', to: 'sessions#logout'
+
+    post 'refresh', to: 'refresh#create'
+    
     get 'who_am_i', to: 'users#who_am_i'
+    patch 'user/update_preferences', to: 'users#update_preferences'
 
     post '/snapshots', to: 'snapshots#create'
 
