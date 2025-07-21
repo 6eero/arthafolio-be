@@ -9,6 +9,8 @@ class ConversionFetcher
   def self.fetch(currency)
     return DEFAULT_RATE if currency.blank?
 
-    SUPPORTED_RATES.fetch(currency, DEFAULT_RATE)
+    rate = SUPPORTED_RATES.fetch(currency, DEFAULT_RATE)
+    Rails.logger.info "🟣 ConversionFetcher: conversion of #{currency} => rate: #{rate}"
+    rate
   end
 end

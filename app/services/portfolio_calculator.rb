@@ -62,6 +62,8 @@ class PortfolioCalculator
   def totals
     current_total = crypto_total.to_f * @conversion_rate
 
+    Rails.logger.info "🟣 PortfolioCalculator: #{crypto_total.to_f} * #{@conversion_rate} = #{current_total}"
+
     periods = {
       day: Date.yesterday,
       week: 1.week.ago.to_date,
