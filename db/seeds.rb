@@ -1,4 +1,4 @@
-if Rails.env.development?
+if Rails.env.developmentt?
   puts '🌱 Seeding development database...'
 
   # Pulizia dati
