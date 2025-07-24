@@ -2,9 +2,8 @@ class ChatCompletionService
   include HTTParty
   base_uri 'https://openrouter.ai/api/v1'
 
-  def initialize(user:, user_message:)
+  def initialize(user:)
     @user = user
-    @user_message = user_message
   end
 
   def call
@@ -18,7 +17,8 @@ class ChatCompletionService
                       'Authorization' => "Bearer #{ENV.fetch('OPENROUTER_API_KEY', nil)}"
                     },
                     body: {
-                      model: 'deepseek/deepseek-r1-0528:free',
+                      model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+                      temperature: 0.7,
                       messages: [
                         {
                           role: 'user',
@@ -41,12 +41,27 @@ class ChatCompletionService
     total = formatted.sum { |line| line[/= ([\d\.]+)/, 1].to_f }
 
     <<~TEXT
-      L'utente possiede i seguenti asset:
+      L'utente possiede esclusivamente criptovalute:
       #{formatted.join("\n")}
 
       Valore totale stimato: #{total.round(2)} EUR.
 
-      Fornisci una valutazione da 0 a 100 su quanto è ben bilanciata e diversificata questa asset allocation. Spiega brevemente il perché. Formatta tutta la risposta in markdown.
+      **Valuta solo asset crypto.** Escludi azioni, ETF, immobili, ecc.
+
+      ### Obiettivo:
+
+      Dai un punteggio **0-100** su **diversificazione e bilanciamento** del portafoglio crypto, considerando:
+
+      1. **Distribuzione**: meglio ≥3 asset ben bilanciati; peggio se 1-2 asset dominano (>60%).
+      2. **Tipologia**: + punti per BTC, ETH, infrastrutturali; – punti per memecoin/speculativi.
+      3. **Categorie**: premia varietà (layer-1, staking, utility); nessuna penalità per stablecoin o DeFi assenti.
+      4. **Rischio BTC**: BTC è riferimento, ma >75% è eccessiva concentrazione.
+
+      ### Risposta:
+
+      * **Valutazione** (es: **72/100**)
+      * **Breve spiegazione** (max 3-4 frasi)
+      * Formatta in **markdown**, chiaro e leggibile.
     TEXT
   end
 end
