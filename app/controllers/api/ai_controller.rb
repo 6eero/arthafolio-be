@@ -1,15 +1,15 @@
-# frozen_string_literal: true
-
 module Api
   class AiController < ApplicationController
-    def chat
-      response = ChatCompletionService.new(user: current_user).call
+    include ActionController::Live
 
-      if response.success?
-        render json: JSON.parse(response.body), status: :ok
-      else
-        render json: { error: 'AI service error', details: response.body }, status: :bad_gateway
-      end
+    def chat
+      response.headers['Content-Type'] = 'text/event-stream'
+      ChatCompletionService.new(user: current_user).stream_to(response.stream)
+    rescue StandardError => e
+      logger.error "Errore nello stream AI: #{e.message}"
+      response.stream.write "data: Errore interno\n\n"
+    ensure
+      response.stream.close
     end
   end
 end
