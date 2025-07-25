@@ -84,8 +84,7 @@ class ChatCompletionService
 
             @accumulated_text << text
             Rails.logger.info "🟣 TEXT PARZIALE: #{@accumulated_text}"
-            clean_text = sanitize_stream_text(text)
-            stream.write("data: #{{ type: 'TEXT', message: clean_text }.to_json}\n\n")
+            stream.write("data: #{{ type: 'TEXT', message: text }.to_json}\n\n")
           end
         end
       end
@@ -158,26 +157,5 @@ class ChatCompletionService
       
       # Ora genera la risposta per il portafoglio dell'utente, **seguendo esattamente lo stile dell'esempio markdown sopra.**
     TEXT
-  end
-
-  def sanitize_stream_text(text)
-    # Rimuove caratteri non stampabili e controlla che le parentesi siano bilanciate
-    cleaned = text.dup
-
-    # Rimuove caratteri nulli o non validi
-    cleaned.gsub!("\u0000", '')
-
-    # Rimuovi caratteri di controllo non necessari (eccetto newline e tab)
-    cleaned.gsub!(/[^\P{C}\n\t]/, '')
-
-    # Aggiungi uno spazio dopo titoli e simboli per evitare concatenazioni "attaccate"
-    cleaned.gsub!(/(\*\*[^*]+\*\*)(?=\S)/, '\1 ') # es: "**Valutazione:**82" -> "**Valutazione:** 82"
-
-    # Assicurati che ogni sezione abbia un newline alla fine per markdown leggibile
-    cleaned.gsub!(/---(?=\S)/, "---\n")
-
-    # Puoi aggiungere altre regole di pulizia se vuoi
-
-    cleaned.strip
   end
 end
