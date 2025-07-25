@@ -3,6 +3,10 @@ class ChatCompletionService
   require 'json'
   require 'uri'
 
+  def initialize(user:)
+    @user = user
+  end
+
   def stream_to(stream)
     prompt = format_holdings_for_prompt
     uri = URI('https://openrouter.ai/api/v1/chat/completions')
