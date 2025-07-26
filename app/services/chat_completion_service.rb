@@ -114,48 +114,49 @@ class ChatCompletionService
     Rails.logger.info "[ChatCompletionService] Valore totale stimato: #{total.round(2)} EUR"
 
     <<~TEXT
-      L'utente possiede esclusivamente criptovalute, **valuta solo asset crypto**. Escludi azioni, ETF, immobili, ecc. Questo è il suo portafoglio:
-      #{formatted.join("\n")}
+      The user exclusively holds cryptocurrencies, **only crypto assets are considered**. Exclude stocks, ETFs, real estate, etc. This is their portfolio:
+      \#{formatted.join("\n")}
       
-      Valore totale stimato: #{total.round(2)} EUR.
+      Estimated total value: #{total.round(2)} EUR.
       
-      # Obiettivo
+      # Objective
       
-      Dai un punteggio **0-100** sul portafoglio crypto, considerando:
+      Give a **0-100 score** to the crypto portfolio, considering the following criteria:
       
-      1. Memecoin e low-cap: Un'alta percentuale di token speculativi e a bassa capitalizzazione abbassa il punteggio.
-      2. Crypto ad alta capitalizzazione: Investire in asset consolidati come Bitcoin o Ethereum migliora il punteggio.
-      3. Stablecoin affidabili: La presenza di stablecoin ben capitalizzate aumenta la resilienza del portafoglio.
-      4. Diversificazione tra ecosistemi: Un portafoglio distribuito su più blockchain e settori riduce il rischio sistemico.
-      5. Liquidità degli asset: Asset liquidi e facilmente scambiabili rendono il portafoglio più flessibile.
-
-      Oltre al punteggio, dai anche un titolo simpatico per definire la tipologia di investitore sulla base del suo portafoglio.
+      1. **Memecoins and low-caps**: A high percentage of speculative or low-cap tokens lowers the score.
+      2. **High-cap cryptocurrencies**: Investing in established assets like Bitcoin or Ethereum increases the score.
+      3. **Reliable stablecoins**: The presence of well-capitalized stablecoins improves portfolio resilience.
+      4. **Diversification across ecosystems**: A portfolio spread across multiple blockchains and sectors reduces systemic risk.
+      5. **Asset liquidity**: Liquid and easily tradable assets make the portfolio more flexible.
       
-      ## Esempio di risposta formattata
+      In addition to the score, provide a fun title to define the investor type based on their portfolio.
       
-      **Valutazione:** 82/100  
-      **Tipologia di investitore:** Il Custode del Ledger   
+      ## Example formatted response
       
-      ---
-      
-      ### Analisi del portafoglio  
-      
-      1. **Memecoin e low-cap**: Bassa esposizione.  
-      2. **Crypto ad alta capitalizzazione**: BTC ed ETH presenti.  
-      3. **Stablecoin affidabili**: USDC e DAI presenti.  
-      4. **Diversificazione tra ecosistemi**: Molto buona.  
-      5. **Liquidità degli asset**: Elevata.  
+      **Rating:** 82/100  
+      **Investor type:** The Ledger Guardian  
       
       ---
       
-      ### Raccomandazioni
+      ### Portfolio Analysis  
       
-      - Mantenere la diversificazione.  
-      - Monitorare l'esposizione a memecoin.
+      1. **Memecoins and low-caps**: Low exposure.  
+      2. **High-cap cryptocurrencies**: BTC and ETH present.  
+      3. **Reliable stablecoins**: USDC and DAI included.  
+      4. **Diversification across ecosystems**: Very good.  
+      5. **Asset liquidity**: High.  
       
       ---
       
-      # Ora genera la risposta per il portafoglio dell'utente, **seguendo esattamente lo stile dell'esempio markdown sopra.**
+      ### Recommendations  
+      
+      * Maintain diversification.  
+      * Monitor memecoin exposure.  
+      
+      ---
+      
+      # Now generate the response for the user's portfolio, **strictly following the markdown style of the example above.**
+      
     TEXT
   end
 end
