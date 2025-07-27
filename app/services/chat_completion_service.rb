@@ -9,17 +9,13 @@ class ChatCompletionService
 
   def initialize(user:)
     @user = user
+    @full_text = ''
   end
 
   def stream_to(stream)
     prompt = format_holdings_for_prompt
-    Rails.logger.info '------------------------------------------------------------------------------------------------'
-    Rails.logger.info "[ChatCompletionService] Prompt generato:\n#{prompt}"
-    Rails.logger.info '------------------------------------------------------------------------------------------------'
-
     uri = URI(API_URL)
-    Rails.logger.info "[ChatCompletionService] Richiesta a #{uri}"
-
+    
     request = Net::HTTP::Post.new(uri)
     request['Content-Type'] = 'application/json'
     request['Authorization'] = "Bearer #{ENV.fetch('OPENROUTER_API_KEY')}"
@@ -33,7 +29,10 @@ class ChatCompletionService
       ]
     }.to_json
 
-    Rails.logger.info '[ChatCompletionService] Inizio richiesta HTTP...'
+    Rails.logger.info '------------------------------------------------------------------------------------------------'
+    Rails.logger.info "[ChatCompletionService] Prompt generato:\n#{prompt}"
+    Rails.logger.info "[ChatCompletionService] Inizio tichiesta HTTP a #{uri}"
+    Rails.logger.info '------------------------------------------------------------------------------------------------'
 
     Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request) do |response|
@@ -43,7 +42,7 @@ class ChatCompletionService
           Rails.logger.error "[ChatCompletionService] ERRORE DALL'API: #{response.code} #{response.message} #{error_body}"
           stream.write("data: #{{ type: 'ERROR', 
                                   message: "API Error: #{response.code} - Controlla i log del server." }.to_json}\n\n")
-          return # Interrompi l'esecuzione qui
+          return 
         end
         Rails.logger.info '[ChatCompletionService] Ricevuta risposta. Streaming in corso...'
         response.read_body do |chunk|
@@ -51,21 +50,24 @@ class ChatCompletionService
             next unless line.start_with?('data: ')
 
             content = line.delete_prefix('data: ').strip
-            next if content == '[DONE]'
+
+            if content == '[DONE]'
+              Rails.logger.info '[ChatCompletionService] Streaming completato. Invio del messaggio finale con testo completo.'
+              stream.write("data: #{{ type: 'COMPLETE', message: @full_text }.to_json}\n\n")
+              break 
+            end
 
             begin
               parsed = JSON.parse(content)
+              text = parsed.dig('choices', 0, 'delta', 'content')
+              next if text.blank?
+
+              @full_text << text
+              stream.write("data: #{{ type: 'TEXT', message: text }.to_json}\n\n")
             rescue JSON::ParserError => e
               Rails.logger.warn "[ChatCompletionService] JSON non valido: #{e.message} - content: '#{content}'"
               next
             end
-
-            text = parsed.dig('choices', 0, 'delta', 'content')
-
-            next if text.blank?
-
-            Rails.logger.info "🟣 TEXT PULITO: #{text}"
-            stream.write("data: #{{ type: 'TEXT', message: text }.to_json}\n\n")
           end
         end
       end
