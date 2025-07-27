@@ -29,11 +29,6 @@ class ChatCompletionService
       ]
     }.to_json
 
-    Rails.logger.info '------------------------------------------------------------------------------------------------'
-    Rails.logger.info "[ChatCompletionService] Prompt generato:\n#{prompt}"
-    Rails.logger.info "[ChatCompletionService] Inizio tichiesta HTTP a #{uri}"
-    Rails.logger.info '------------------------------------------------------------------------------------------------'
-
     Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request) do |response|
         # --- ERROR FROM OPENROUTER ---
@@ -44,7 +39,13 @@ class ChatCompletionService
                                   message: "API Error: #{response.code} - Controlla i log del server." }.to_json}\n\n")
           return 
         end
+
+        Rails.logger.info '------------------------------------------------------------------------------------------------'
+        Rails.logger.info "[ChatCompletionService] Prompt generato:\n#{prompt}"
+        Rails.logger.info "[ChatCompletionService] Inizio tichiesta HTTP a #{uri}"
         Rails.logger.info '[ChatCompletionService] Ricevuta risposta. Streaming in corso...'
+        Rails.logger.info '------------------------------------------------------------------------------------------------'
+        
         response.read_body do |chunk|
           chunk.lines.each do |line|
             next unless line.start_with?('data: ')
@@ -53,7 +54,7 @@ class ChatCompletionService
 
             if content == '[DONE]'
               Rails.logger.info '[ChatCompletionService] Streaming completato. Invio del messaggio finale con testo completo.'
-              stream.write("data: #{{ type: 'COMPLETE', message: @full_text }.to_json}\n\n")
+              stream.write("data: #{{ type: 'COMPLETE', message: 'testo temporaneo a scopo di debug' }.to_json}\n\n")
               break 
             end
 
