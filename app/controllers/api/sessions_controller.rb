@@ -19,7 +19,7 @@ module Api
       if @user&.authenticate(params[:password])
 
         # 3. Se l'autenticazione ha successo, genera l'access token (vita breve) e refresh token sicuro e univoco (vita lunga)
-        access_token = jwt_encode({ user_id: @user.id }, 1.hour.from_now)
+        access_token = jwt_encode({ user_id: @user.id }, 1.minute.from_now)
         refresh_token = SecureRandom.hex(32)
 
         # 4. Salva il refresh token nel database per l'utente
