@@ -18,6 +18,11 @@ module Api
       # 2. Verifica che l'utente esista e che la password sia corretta
       if @user&.authenticate(params[:password])
 
+        unless @user.confirmed?
+          return render json: { error: 'Email non confermata. Controlla la tua posta.', message: 'email_not_confirmed' },
+                        status: :unauthorized
+        end
+
         # 3. Se l'autenticazione ha successo, genera l'access token (vita breve) e refresh token sicuro e univoco (vita lunga)
         access_token = jwt_encode({ user_id: @user.id }, 30.minutes.from_now)
         refresh_token = SecureRandom.hex(32)

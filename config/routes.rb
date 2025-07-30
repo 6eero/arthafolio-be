@@ -9,6 +9,9 @@ Rails.application.routes.draw do
     post 'login', to: 'sessions#login'
     delete 'logout', to: 'sessions#logout'
 
+    post 'register', to: 'registrations#create'
+    get 'confirm_email', to: 'registrations#confirm_email'
+
     post 'refresh', to: 'refresh#create'
 
     get 'who_am_i', to: 'users#who_am_i'
