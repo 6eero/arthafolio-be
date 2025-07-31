@@ -6,7 +6,7 @@ module Api
       user = User.new(user_params)
 
       if user.save
-        UserMailer.confirmation_email(user).deliver_later
+        UserMailer.confirmation_email(user).deliver_now
         render json: { message: 'Registrazione completata. Controlla la tua email per confermare l’account.' },
                status: :created
       else
